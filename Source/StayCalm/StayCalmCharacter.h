@@ -37,41 +37,42 @@ class AStayCalmCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
-	/** Motion controller (right hand) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UMotionControllerComponent* R_MotionController;
-
-	/** Motion controller (left hand) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UMotionControllerComponent* L_MotionController;
-
 public:
 	AStayCalmCharacter();
 
 protected:
 	virtual void BeginPlay();
 
-	//The delay that the character experiences during panic.
+	//The delay that the character experiences during panic. Level 1 = .2 , Level 2 = .5, Level 3 = 1
 	UPROPERTY()
-		float movement_time_delay = 0.0f;
+		float movement_time_delay = 1.0f;
+
+	//This is the denominator for the movement speed 1. When set to 1 the movement is 1/1 and when set to 2 the speed is 1/2 etc. Level 1 = 1.5 , Level 2 = 1.75, Level 3 = 2
+	UPROPERTY()
+		float movement_speed = 2.0f;
 
 	void setMovementTimeDelay(float time_delay);
 
 	//Timer handle for Delayed movement
 	FTimerHandle ftimer_movement_delay;
 
-	TQueue<int[2], EQueueMode::Spsc> q_movement_input;
-
 	enum e_movement_direction {
-		UP= 1,
-		RIGHT = 2,
-		DOWN = 3,
-		LEFT = 4,
-		LOOKFORWARD = 360,
-		LOOKRIGHT = 90,
-		LOOKDOWN = 180,
-		LOOKLEFT = 270
+		FORWARD,
+		RIGHT,
+		LOOKUP,
+		LOOKRIGHT,
 	};
+
+
+	struct movement
+	{
+		int direction;
+		float value;
+	};
+
+	void executeDelayedMovement();
+
+	TQueue<movement> *q_movement_input = new TQueue<movement>;
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -107,15 +108,17 @@ protected:
 	/** Fires a projectile. */
 	void OnFire();
 
-	/** Resets HMD orientation and position in VR. */
-	void OnResetVR();
-
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
 	/** Handles stafing movement, left and right */
 	void MoveRight(float Val);
 
+	/** Handles camera movement, left and right */
+	void LookRight(float Value);
+
+	/** Handles camera up/down */
+	void LookUp(float Val);
 	/**
 	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -128,31 +131,11 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	struct TouchData
-	{
-		TouchData() { bIsPressed = false;Location=FVector::ZeroVector;}
-		bool bIsPressed;
-		ETouchIndex::Type FingerIndex;
-		FVector Location;
-		bool bMoved;
-	};
-	void BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
-	void EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
-	void TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location);
-	TouchData	TouchItem;
-	
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
-
-	/* 
-	 * Configures input for touchscreen devices if there is a valid touch interface for doing so 
-	 *
-	 * @param	InputComponent	The input component pointer to bind controls to
-	 * @returns true if touch controls were enabled.
-	 */
-	bool EnableTouchscreenMovement(UInputComponent* InputComponent);
 
 public:
 	/** Returns Mesh1P subobject **/
