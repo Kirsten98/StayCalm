@@ -43,11 +43,20 @@ public:
 protected:
 	virtual void BeginPlay();
 
-	//The delay that the character experiences during panic. Level 1 = .2 , Level 2 = .5, Level 3 = 1
+	//Constant level variables for the different stages of movement time delay for movement_time_delay
+	const float level_one_movement_time_delay = .5f;
+	const float level_two_movement_time_delay = .75f;
+	const float level_three_movement_time_delay = 1.0f;
+	//The delay that the character experiences during panic. Level 1 = .5 , Level 2 = .75, Level 3 = 1
 	UPROPERTY()
-		float movement_time_delay = 1.0f;
+		float movement_time_delay = .5f;
 
-	//This is the denominator for the movement speed 1. When set to 1 the movement is 1/1 and when set to 2 the speed is 1/2 etc. Level 1 = 1.5 , Level 2 = 1.75, Level 3 = 2
+
+	//Constant level variables for the different stages of movement slowed speed for movement_speed
+	const float level_one_movement_speed = 1.5f;
+	const float level_two_movement_speed = 2.0f;
+	const float level_three_movement_speed = 3.0f;
+	//This is the denominator for the movement speed 1. When set to 1 the movement is 1/1 and when set to 2 the speed is 1/2 etc. Level 1 = 1.5 , Level 2 = 2.0, Level 3 = 3
 	UPROPERTY()
 		float movement_speed = 2.0f;
 
