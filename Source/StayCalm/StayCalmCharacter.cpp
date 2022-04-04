@@ -185,6 +185,12 @@ void AStayCalmCharacter::executeDelayedMovement()
 		{
 			AddMovementInput(GetActorForwardVector(), value);
 			q_movement_input->Pop();
+
+			//Checks if the character is strafing
+			if (q_movement_input->Peek() != nullptr && q_movement_input->Peek()->direction == e_movement_direction::RIGHT) {
+				AddMovementInput(GetActorRightVector(), q_movement_input->Peek()->value);
+				q_movement_input->Pop();
+			}
 			//UE_LOG(LogTemp, Warning, TEXT("Moved Forward: %f"), value);
 		}
 		else if (this_action->direction == e_movement_direction::RIGHT)
@@ -192,6 +198,12 @@ void AStayCalmCharacter::executeDelayedMovement()
 			AddMovementInput(GetActorRightVector(), this_action->value);
 			q_movement_input->Pop();
 			//UE_LOG(LogTemp, Warning, TEXT("Moved Right: %f"), value);
+			
+			//Checks if the character is strafing
+			if (q_movement_input->Peek() != nullptr && q_movement_input->Peek()->direction == e_movement_direction::FORWARD) {
+				AddMovementInput(GetActorForwardVector(), q_movement_input->Peek()->value);
+				q_movement_input->Pop();
+			}
 		}
 		/*
 		else if (this_action->direction == e_movement_direction::LOOKUP)
