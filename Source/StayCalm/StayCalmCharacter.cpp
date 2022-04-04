@@ -61,20 +61,12 @@ AStayCalmCharacter::AStayCalmCharacter()
 	// Note: The ProjectileClass and the skeletal mesh/anim blueprints for Mesh1P, FP_Gun, and VR_Gun 
 	// are set in the derived blueprint asset named MyCharacter to avoid direct content references in C++.
 
-	// Create VR Controllers.
-	R_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("R_MotionController"));
-	R_MotionController->MotionSource = FXRMotionControllerBase::RightHandSourceId;
-	R_MotionController->SetupAttachment(RootComponent);
-	L_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("L_MotionController"));
-	L_MotionController->SetupAttachment(RootComponent);
-
 	// Create a gun and attach it to the right-hand VR controller.
 	// Create a gun mesh component
 	VR_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VR_Gun"));
 	VR_Gun->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
 	VR_Gun->bCastDynamicShadow = false;
 	VR_Gun->CastShadow = false;
-	VR_Gun->SetupAttachment(R_MotionController);
 	VR_Gun->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
 	VR_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("VR_MuzzleLocation"));
@@ -122,11 +114,6 @@ void AStayCalmCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Bind fire event
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AStayCalmCharacter::OnFire);
 
-	// Enable touchscreen input
-	EnableTouchscreenMovement(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AStayCalmCharacter::OnResetVR);
-
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AStayCalmCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AStayCalmCharacter::MoveRight);
@@ -134,10 +121,8 @@ void AStayCalmCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AStayCalmCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AStayCalmCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("Turn", this, &AStayCalmCharacter::LookRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &AStayCalmCharacter::LookUp);
 }
 
 void AStayCalmCharacter::OnFire()
@@ -184,85 +169,85 @@ void AStayCalmCharacter::OnFire()
 		if (AnimInstance != NULL)
 		{
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
+		} 
+	}
+}
+
+void AStayCalmCharacter::executeDelayedMovement()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Execute Delayed Movement"));
+	if (q_movement_input->Peek() != nullptr)
+	{
+		movement *this_action = q_movement_input->Peek();
+		float value = this_action->value;
+
+		if (this_action->direction == e_movement_direction::FORWARD)
+		{
+			AddMovementInput(GetActorForwardVector(), value);
+			q_movement_input->Pop();
+
+			//Checks if the character is strafing
+			if (q_movement_input->Peek() != nullptr && q_movement_input->Peek()->direction == e_movement_direction::RIGHT) {
+				AddMovementInput(GetActorRightVector(), q_movement_input->Peek()->value);
+				q_movement_input->Pop();
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("Moved Forward: %f"), value);
 		}
+		else if (this_action->direction == e_movement_direction::RIGHT)
+		{
+			AddMovementInput(GetActorRightVector(), this_action->value);
+			q_movement_input->Pop();
+			//UE_LOG(LogTemp, Warning, TEXT("Moved Right: %f"), value);
+			
+			//Checks if the character is strafing
+			if (q_movement_input->Peek() != nullptr && q_movement_input->Peek()->direction == e_movement_direction::FORWARD) {
+				AddMovementInput(GetActorForwardVector(), q_movement_input->Peek()->value);
+				q_movement_input->Pop();
+			}
+		}
+		/*
+		else if (this_action->direction == e_movement_direction::LOOKUP)
+		{
+			AddControllerPitchInput(value);
+			q_movement_input->Pop();
+			//UE_LOG(LogTemp, Warning, TEXT("Look Up: %d"), value);
+			
+		}
+		else if (this_action->direction == e_movement_direction::LOOKRIGHT)
+		{
+			AddControllerYawInput(value);
+			q_movement_input->Pop();
+			//UE_LOG(LogTemp, Warning, TEXT("Look Right: %d"), value);
+			
+		}
+		*/
+		GetWorldTimerManager().SetTimer(ftimer_movement_delay, this, &AStayCalmCharacter::executeDelayedMovement, movement_time_delay, true, 0);
 	}
 }
 
-void AStayCalmCharacter::OnResetVR()
-{
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
 
-void AStayCalmCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == true)
-	{
-		return;
-	}
-	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
-	{
-		OnFire();
-	}
-	TouchItem.bIsPressed = true;
-	TouchItem.FingerIndex = FingerIndex;
-	TouchItem.Location = Location;
-	TouchItem.bMoved = false;
-}
 
-void AStayCalmCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == false)
-	{
-		return;
-	}
-	TouchItem.bIsPressed = false;
-}
-
-//Commenting this section out to be consistent with FPS BP template.
-//This allows the user to turn without using the right virtual joystick
-
-//void AStayCalmCharacter::TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location)
-//{
-//	if ((TouchItem.bIsPressed == true) && (TouchItem.FingerIndex == FingerIndex))
-//	{
-//		if (TouchItem.bIsPressed)
-//		{
-//			if (GetWorld() != nullptr)
-//			{
-//				UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
-//				if (ViewportClient != nullptr)
-//				{
-//					FVector MoveDelta = Location - TouchItem.Location;
-//					FVector2D ScreenSize;
-//					ViewportClient->GetViewportSize(ScreenSize);
-//					FVector2D ScaledDelta = FVector2D(MoveDelta.X, MoveDelta.Y) / ScreenSize;
-//					if (FMath::Abs(ScaledDelta.X) >= 4.0 / ScreenSize.X)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.X * BaseTurnRate;
-//						AddControllerYawInput(Value);
-//					}
-//					if (FMath::Abs(ScaledDelta.Y) >= 4.0 / ScreenSize.Y)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.Y * BaseTurnRate;
-//						AddControllerPitchInput(Value);
-//					}
-//					TouchItem.Location = Location;
-//				}
-//				TouchItem.Location = Location;
-//			}
-//		}
-//	}
-//}
 
 void AStayCalmCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
 	{
-		AddMovementInput(GetActorForwardVector(), Value);
-		
-		// add movement in that direction
+		if (movement_time_delay > 0) {
+			movement characterMovement;
+			characterMovement.direction = e_movement_direction::FORWARD;
+			characterMovement.value = Value / movement_speed;
+			q_movement_input->Enqueue(characterMovement);
+
+
+			if (!GetWorldTimerManager().IsTimerActive(ftimer_movement_delay))
+			{
+				AddMovementInput(GetActorForwardVector(), Value / movement_speed);
+				executeDelayedMovement();
+			}
+		}
+		else {
+			AddMovementInput(GetActorForwardVector(), Value/ movement_speed);
+		}
 		
 	}
 }
@@ -271,36 +256,92 @@ void AStayCalmCharacter::MoveRight(float Value)
 {
 	if (Value != 0.0f)
 	{
-		// add movement in that direction
-		AddMovementInput(GetActorRightVector(), Value);
+		if (movement_time_delay > 0) {
+			movement characterMovement;
+			characterMovement.direction = e_movement_direction::RIGHT;
+			characterMovement.value = Value / movement_speed;
+			q_movement_input->Enqueue(characterMovement);
+
+
+			if (!GetWorldTimerManager().IsTimerActive(ftimer_movement_delay))
+			{
+				AddMovementInput(GetActorRightVector(), Value / movement_speed);
+				executeDelayedMovement();
+			}
+		}
+		else {
+			AddMovementInput(GetActorRightVector(), Value / movement_speed);
+		}
 	}
+}
+
+void AStayCalmCharacter::LookRight(float Value) 
+{
+	/*
+	if (Value != 0.0f) {
+		if (movement_speed > 0) {
+			movement characterMovement;
+			characterMovement.direction = e_movement_direction::LOOKRIGHT;
+			characterMovement.value = Value / movement_speed;
+			q_movement_input->Enqueue(characterMovement);
+
+
+			if (!GetWorldTimerManager().IsTimerActive(ftimer_movement_delay))
+			{
+				AddControllerYawInput(Value / movement_speed);
+				executeDelayedMovement();
+			}
+		}
+		else {
+			AddControllerYawInput(Value / movement_speed);
+		}
+	}
+	*/
+	AddControllerYawInput(Value / movement_speed);
+	
+}
+
+void AStayCalmCharacter::LookUp(float Value) 
+{
+	/*
+	if (Value != 0.0f) {
+
+		if (movement_speed > 0) {
+			movement characterMovement;
+			characterMovement.direction = e_movement_direction::LOOKUP;
+			characterMovement.value = Value / movement_speed;
+			q_movement_input->Enqueue(characterMovement);
+
+
+			if (!GetWorldTimerManager().IsTimerActive(ftimer_movement_delay))
+			{
+				AddControllerPitchInput(Value / movement_speed);
+				executeDelayedMovement();
+			}
+		}
+		else {
+			AddControllerPitchInput(Value / movement_speed);
+		}
+	}
+	*/
+	AddControllerPitchInput(Value / movement_speed);
+	
 }
 
 void AStayCalmCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	
 }
 
 void AStayCalmCharacter::LookUpAtRate(float Rate)
 {
+
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
-bool AStayCalmCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
-{
-	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
-	{
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AStayCalmCharacter::BeginTouch);
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Released, this, &AStayCalmCharacter::EndTouch);
-
-		//Commenting this out to be more consistent with FPS BP template.
-		//PlayerInputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AStayCalmCharacter::TouchUpdate);
-		return true;
-	}
 	
-	return false;
+	
 }
 
 //Sets the delay in ms for the characters input to the parameter. 
