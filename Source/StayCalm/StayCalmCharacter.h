@@ -148,8 +148,6 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	void setCameraBlurLevel(int level);
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
