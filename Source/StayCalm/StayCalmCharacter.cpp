@@ -105,9 +105,6 @@ void AStayCalmCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
-	updatePanicBlur(0);
-	//updateCameraBlur(4);
-	//PanicPostProcessVolume->updateCameraBlur(4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -182,14 +179,6 @@ void AStayCalmCharacter::OnFire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		} 
 	}
-
-	setCameraBlurLevel(4);
-}
-
-void AStayCalmCharacter::setCameraBlurLevel(int level)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Blur"));
-	//updateCameraBlur(level);
 }
 
 void AStayCalmCharacter::executeDelayedMovement()
