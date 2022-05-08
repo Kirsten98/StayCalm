@@ -37,6 +37,9 @@ class AStayCalmCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Panic, meta = (AllowPrivateAccess = "true"))
+	class UPostProcessComponent* PanicPostProcess;
 public:
 	AStayCalmCharacter();
 
@@ -83,6 +86,9 @@ protected:
 
 	TQueue<movement> *q_movement_input = new TQueue<movement>;
 
+	UFUNCTION(BlueprintImplementableEvent, Category=Panic)
+		void updatePanicBlur(int level);
+
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -112,6 +118,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+	
+
 protected:
 	
 	/** Fires a projectile. */
@@ -139,7 +147,6 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookUpAtRate(float Rate);
-
 
 protected:
 	// APawn interface
