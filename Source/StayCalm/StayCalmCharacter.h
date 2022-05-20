@@ -86,8 +86,13 @@ protected:
 
 	TQueue<movement> *q_movement_input = new TQueue<movement>;
 
+	//Updates intesity of the blur a user will experience. Level 0 - No Blur, Level 3 Max Blur
 	UFUNCTION(BlueprintImplementableEvent, Category=Panic)
 		void updatePanicBlur(int level);
+
+	//Updates intesity of the depth perception change user will experience. Level 0 - No change, Level 3 Max distance the camera will view.
+	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
+		void updateDepthPerception(int level);
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
