@@ -105,6 +105,8 @@ void AStayCalmCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
