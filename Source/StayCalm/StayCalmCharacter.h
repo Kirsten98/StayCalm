@@ -35,7 +35,7 @@ class AStayCalmCharacter : public ACharacter
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FirstPersonCameraComponent;
+	class UCineCameraComponent* FirstPersonCameraComponent;
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Panic, meta = (AllowPrivateAccess = "true"))
@@ -45,6 +45,9 @@ public:
 
 protected:
 	virtual void BeginPlay();
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	//Constant level variables for the different stages of movement time delay for movement_time_delay
 	const float level_one_movement_time_delay = .5f;
@@ -93,6 +96,15 @@ protected:
 	//Updates intesity of the depth perception change user will experience. Level 0 - No change, Level 3 Max distance the camera will view.
 	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
 		void updateDepthPerception(int level);
+
+	//Updates intesity of the depth perception change user will experience. Level 0 - No change, Level 3 Max distance the camera will view.
+	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
+		void tunnelVisionOnObject(int level, FHitResult out_hit, float delta_time);
+	//Determines if the current panic level is active
+	bool has_tunnel_vision = false;
+
+	//Keeps track of the last object to maintain the depth of field consistent when chanracter changes their sight
+	FHitResult current_tunnel_vision_object;
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -162,7 +174,7 @@ public:
 	/** Returns Mesh1P subobject **/
 	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	FORCEINLINE class UCineCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 };
 

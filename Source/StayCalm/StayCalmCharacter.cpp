@@ -4,6 +4,7 @@
 #include "StayCalmProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
+#include "CineCameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
@@ -15,6 +16,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PanicProcessVolume.h"
 #include "Components/PostProcessComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -32,7 +34,7 @@ AStayCalmCharacter::AStayCalmCharacter()
 	BaseLookUpRate = 45.f;
 	
 	// Create a CameraComponent	
-	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCineCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
@@ -90,6 +92,8 @@ void AStayCalmCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	has_tunnel_vision = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
@@ -358,4 +362,41 @@ void AStayCalmCharacter::LookUpAtRate(float Rate)
 void AStayCalmCharacter::setMovementTimeDelay(float time_delay) 
 {
 	movement_time_delay = time_delay;
+}
+
+void AStayCalmCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (has_tunnel_vision)
+	{
+		FHitResult out_hit;
+
+		//Empty Query Params
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+
+		FVector starting_position = GetActorLocation();
+
+		//Adjusts the horizontal starting position;
+		//starting_position.Z += 50.f;
+		//Adjusts the vertical starting position;
+		
+
+		FVector forward_vector = GetActorForwardVector();
+		FVector end = (forward_vector * 5000) + starting_position;
+
+		DrawDebugLine(GetWorld(), starting_position, end, FColor::Green, false, 1, 0, 5);
+		
+		if (GetWorld()->LineTraceSingleByChannel(out_hit, starting_position, end, ECC_WorldStatic, CollisionParams)) {
+			tunnelVisionOnObject(3, out_hit, DeltaTime);
+			current_tunnel_vision_object = out_hit;
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("The Component Being Hit is: %s"), *out_hit.GetComponent()->GetName()));
+		}
+		//else {
+			///tunnelVisionOnObject(3, current_tunnel_vision_object.GetComponent());
+			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("The Component Being Hit is: %s"), *current_tunnel_vision_object.GetComponent()->GetName()));
+		//}
+	}
+	
 }
