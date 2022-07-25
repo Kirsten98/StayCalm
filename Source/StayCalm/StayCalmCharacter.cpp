@@ -384,7 +384,7 @@ void AStayCalmCharacter::Tick(float DeltaTime)
 		
 
 		FVector forward_vector = GetActorForwardVector();
-		FVector end = (forward_vector * 5000) + starting_position;
+		FVector end = (forward_vector * 300) + starting_position;
 
 		DrawDebugLine(GetWorld(), starting_position, end, FColor::Green, false, 1, 0, 5);
 		
