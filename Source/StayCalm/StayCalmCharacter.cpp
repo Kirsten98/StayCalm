@@ -105,7 +105,6 @@ void AStayCalmCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
-
 	
 }
 
@@ -358,4 +357,12 @@ void AStayCalmCharacter::LookUpAtRate(float Rate)
 void AStayCalmCharacter::setMovementTimeDelay(float time_delay) 
 {
 	movement_time_delay = time_delay;
+}
+
+void AStayCalmCharacter::playPanicHeartBeat(int level)
+{
+	if (heartBeatSound != nullptr) {
+		UGameplayStatics::PlaySoundAtLocation(this, heartBeatSound, GetActorLocation(),(1.0 + (.25 * level)));
+	}
+	
 }

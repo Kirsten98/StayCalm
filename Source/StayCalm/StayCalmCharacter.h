@@ -84,6 +84,11 @@ protected:
 
 	void executeDelayedMovement();
 
+	UPROPERTY(EditAnywhere, Category = Panic)
+		class USoundBase* heartBeatSound;
+
+	void playPanicHeartBeat(int level);
+
 	TQueue<movement> *q_movement_input = new TQueue<movement>;
 
 	//Updates intesity of the blur a user will experience. Level 0 - No Blur, Level 3 Max Blur
