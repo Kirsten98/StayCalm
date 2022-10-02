@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PanicProcessVolume.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/AudioComponent.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -41,6 +42,7 @@ AStayCalmCharacter::AStayCalmCharacter()
 	PanicPostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PanicPostProcess"));
 	PanicPostProcess->SetupAttachment(GetCapsuleComponent());
 
+	HeartBeatAudioCue = CreateDefaultSubobject<UAudioComponent>(TEXT("HeartBeatAudio"));
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
@@ -105,7 +107,6 @@ void AStayCalmCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
-
 	
 }
 
@@ -137,6 +138,7 @@ void AStayCalmCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 void AStayCalmCharacter::OnFire()
 {
+
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
@@ -358,4 +360,47 @@ void AStayCalmCharacter::LookUpAtRate(float Rate)
 void AStayCalmCharacter::setMovementTimeDelay(float time_delay) 
 {
 	movement_time_delay = time_delay;
+}
+
+void AStayCalmCharacter::playPanicHeartBeat(int level)
+{
+	if (HeartBeatAudioCue != nullptr) 
+	{
+		//HeartBeatAudioCue->SetVolumeMultiplier(level + 0.0);
+		HeartBeatAudioCue->Play();
+		
+	}
+	
+}
+
+void AStayCalmCharacter::stopPlayingPanicHeartBeat()
+{
+	if (HeartBeatAudioCue != nullptr)
+	{
+		HeartBeatAudioCue->Stop();
+	}
+
+}
+
+
+void AStayCalmCharacter::startPanic(int level)
+{
+	switch(level) {
+
+	case 0 :
+
+		break;
+	case 1 :
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+
+	}
+}
+
+void AStayCalmCharacter::stopPanic()
+{
+	
 }
