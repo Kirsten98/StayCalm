@@ -46,6 +46,8 @@ public:
 protected:
 	virtual void BeginPlay();
 
+	int panicLevel = 0;
+
 	//Constant level variables for the different stages of movement time delay for movement_time_delay
 	const float level_one_movement_time_delay = .5f;
 	const float level_two_movement_time_delay = .75f;
@@ -87,7 +89,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Panic)
 		class UAudioComponent* HeartBeatAudioCue;		
 
-	void playPanicHeartBeat(int level);
+	void playPanicHeartBeat(float level);
 	void stopPlayingPanicHeartBeat();
 	void startPanic(int level);
 	void stopPanic();

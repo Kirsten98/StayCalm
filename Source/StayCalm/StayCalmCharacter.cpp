@@ -365,7 +365,7 @@ void AStayCalmCharacter::setMovementTimeDelay(float time_delay)
 	movement_time_delay = time_delay;
 }
 
-void AStayCalmCharacter::playPanicHeartBeat(int level)
+void AStayCalmCharacter::playPanicHeartBeat(float level)
 {
 	if (HeartBeatAudioCue != nullptr) 
 	{
@@ -388,22 +388,59 @@ void AStayCalmCharacter::stopPlayingPanicHeartBeat()
 
 void AStayCalmCharacter::startPanic(int level)
 {
+	//Stops any panic symptoms before starting the next level
+	stopPanic();
+
 	switch(level) {
 
-	case 0 :
-
-		break;
 	case 1 :
+		updatePanicBlur(1);
+		playPanicHeartBeat(.5);
 		break;
-	case 2:
+	case 2 :
+		updatePanicBlur(1);
+		playPanicHeartBeat(.5);
+		updateDepthPerception(1);
+		setMovementTimeDelay(level_one_movement_time_delay);
+		movement_speed = level_one_movement_speed;
 		break;
 	case 3:
+		updatePanicBlur(2);
+		playPanicHeartBeat(1.5);
+		updateDepthPerception(2);
+		setMovementTimeDelay(level_two_movement_time_delay);
+		movement_speed = level_two_movement_speed;
 		break;
+	case 4:
+		updatePanicBlur(3);
+		playPanicHeartBeat(2.0);
+		updateDepthPerception(2);
+		setMovementTimeDelay(level_two_movement_time_delay);
+		movement_speed = level_two_movement_speed;
+		break;
+
+	case 5:
+		updatePanicBlur(3);
+		playPanicHeartBeat(3.0);
+		updateDepthPerception(3);
+		setMovementTimeDelay(level_three_movement_time_delay);
+		movement_speed = level_three_movement_speed;
+		break;
+	default:
+		stopPanic();
 
 	}
 }
 
+/*
+* Resets all panic symtoms
+*/
 void AStayCalmCharacter::stopPanic()
 {
-	
+	updatePanicBlur(0);
+	stopPlayingPanicHeartBeat();
+	updateDepthPerception(0);
+	movement_speed = 1.0;
+	setMovementTimeDelay(1.0);
+
 }
