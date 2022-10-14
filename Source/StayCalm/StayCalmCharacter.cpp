@@ -98,6 +98,9 @@ void AStayCalmCharacter::BeginPlay()
 	
 	//Stops the heartbeat cue from playing
 	stopPlayingPanicHeartBeat();
+
+	//Retrieves a list of all of the panic triggers
+	addAllPanicTriggers();
 	
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -111,6 +114,11 @@ void AStayCalmCharacter::BeginPlay()
 		Mesh1P->SetHiddenInGame(false, true);
 	}
 	
+}
+
+void AStayCalmCharacter::Tick(float DeltaTime)
+{
+	//Add Line Trace for Panic Trigger function
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -443,4 +451,23 @@ void AStayCalmCharacter::stopPanic()
 	movement_speed = 1.0;
 	setMovementTimeDelay(1.0);
 
+}
+
+void AStayCalmCharacter::addAllPanicTriggers()
+{
+	
+	if (GetWorld() != nullptr) 
+	{
+		TArray<AActor*> found_actors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APanicTrigger::StaticClass(), found_actors);
+		
+		for (int actor = 0; actor < found_actors.Num(); actor++)
+		{
+			found_actors.Push(Cast<APanicTrigger>(found_actors[actor]));
+			//UE_LOG(LogTemp, Warning, TEXT("Found %d triggers"), found_triggers[actor]->get_panic_level());
+		}
+		
+		found_triggers.Sort();
+	}
+	
 }

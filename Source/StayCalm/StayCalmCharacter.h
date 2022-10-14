@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include "PanicTrigger.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "StayCalmCharacter.generated.h"
+
 
 class UInputComponent;
 
@@ -45,6 +47,8 @@ public:
 
 protected:
 	virtual void BeginPlay();
+
+	void Tick(float DeltaTime);
 
 	int panicLevel = 0;
 
@@ -94,8 +98,18 @@ protected:
 	void startPanic(int level);
 	void stopPanic();
 
-	
 	TQueue<movement> *q_movement_input = new TQueue<movement>;
+
+	TArray<APanicTrigger*> found_triggers;
+
+	void addAllPanicTriggers();
+
+
+	//Add function to add Panic Line Trace
+	//Set Panic Level	
+	//Destroy Trigger
+
+
 
 	//Updates intesity of the blur a user will experience. Level 0 - No Blur, Level 3 Max Blur
 	UFUNCTION(BlueprintImplementableEvent, Category=Panic)

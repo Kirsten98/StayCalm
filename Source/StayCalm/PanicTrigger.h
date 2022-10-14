@@ -21,6 +21,7 @@ public:
 	//The panic level that should be caused by this object
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Panic);
 	int panic_level = 0;
+	inline int get_panic_level(){ return panic_level; };
 
 	bool get_is_visible();
 	void set_is_visible(bool visible);
@@ -28,6 +29,31 @@ public:
 	bool get_panic_trigger_active();
 	void set_panic_trigger_active(bool active);
 
+	
+	//Sets the comparison between panic triggers
+	friend bool operator< (const APanicTrigger& l, const APanicTrigger& r)
+	{
+		return l.panic_level
+			< r.panic_level; // keep the same order
+	}
+
+	friend bool operator> (const APanicTrigger& l, const APanicTrigger& r)
+	{
+		return l.panic_level
+			> r.panic_level; // keep the same order
+	}
+
+	friend bool operator<= (const APanicTrigger& l, const APanicTrigger& r)
+	{
+		return l.panic_level
+			<= r.panic_level; // keep the same order
+	}
+
+	friend bool operator>=(const APanicTrigger& l, const APanicTrigger& r)
+	{
+		return l.panic_level
+			>= r.panic_level; // keep the same order
+	}
 
 protected:
 	// Called when the game starts or when spawned
