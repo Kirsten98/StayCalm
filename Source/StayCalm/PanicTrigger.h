@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Components/CapsuleComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PanicTrigger.generated.h"
@@ -29,6 +30,9 @@ public:
 	bool get_panic_trigger_active();
 	void set_panic_trigger_active(bool active);
 
+	//Implement what should happen for each panic trigger within the blueprint. Should Return Panic Level for trigger
+	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
+		void trigger_event();
 	
 	//Sets the comparison between panic triggers
 	friend bool operator< (const APanicTrigger& l, const APanicTrigger& r)
@@ -59,8 +63,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	bool is_visible = false;
-	bool panic_trigger_active = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Panic)
+	bool is_visible = true;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Panic)
+	bool panic_trigger_active = true;
 
 public:	
 	// Called every frame

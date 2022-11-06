@@ -16,6 +16,7 @@
 #include "PanicProcessVolume.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/AudioComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -118,7 +119,7 @@ void AStayCalmCharacter::BeginPlay()
 
 void AStayCalmCharacter::Tick(float DeltaTime)
 {
-	//Add Line Trace for Panic Trigger function
+	panicLineTrace();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -458,16 +459,60 @@ void AStayCalmCharacter::addAllPanicTriggers()
 	
 	if (GetWorld() != nullptr) 
 	{
+		
 		TArray<AActor*> found_actors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APanicTrigger::StaticClass(), found_actors);
 		
 		for (int actor = 0; actor < found_actors.Num(); actor++)
 		{
-			found_actors.Push(Cast<APanicTrigger>(found_actors[actor]));
+			found_triggers.Push(Cast<APanicTrigger>(found_actors[actor]));
 			//UE_LOG(LogTemp, Warning, TEXT("Found %d triggers"), found_triggers[actor]->get_panic_level());
 		}
 		
 		found_triggers.Sort();
+		
 	}
 	
+}
+
+void AStayCalmCharacter::panicLineTrace()
+{
+	UWorld *world = GetWorld();
+	
+	if (world)
+	{
+		FHitResult hit_result;
+
+		FVector start = GetActorLocation();
+		FVector end = start + (GetActorForwardVector() * 500);
+
+		FCollisionObjectQueryParams parameters;
+		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel3);
+
+		FCollisionQueryParams query_params;
+		query_params.AddIgnoredActor(this);
+
+		DrawDebugLine(world, start, end, FColor::Red);
+		
+		if (world->LineTraceSingleByObjectType(hit_result, start, end, parameters, query_params))
+		{
+			
+			APanicTrigger* trigger = Cast<APanicTrigger>(hit_result.GetActor());
+			UE_LOG(LogTemp, Warning, TEXT("Found Trigger"));
+
+			if (trigger != nullptr && trigger->get_is_visible())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Trigger is visible"));
+				if (trigger->get_panic_trigger_active())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Trigger is active"));
+					trigger->trigger_event();
+				}
+				
+			}
+			
+		}
+		
+		
+	}
 }

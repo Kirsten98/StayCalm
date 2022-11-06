@@ -17,9 +17,6 @@ APanicTrigger::APanicTrigger()
 void APanicTrigger::BeginPlay()
 {
 	Super::BeginPlay();
-
-	set_is_visible(false);
-	
 }
 
 // Called every frame

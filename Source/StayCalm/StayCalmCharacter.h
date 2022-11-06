@@ -104,12 +104,7 @@ protected:
 
 	void addAllPanicTriggers();
 
-
-	//Add function to add Panic Line Trace
-	//Set Panic Level	
-	//Destroy Trigger
-
-
+	void panicLineTrace();
 
 	//Updates intesity of the blur a user will experience. Level 0 - No Blur, Level 3 Max Blur
 	UFUNCTION(BlueprintImplementableEvent, Category=Panic)
