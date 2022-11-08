@@ -405,6 +405,7 @@ void AStayCalmCharacter::startPanic(int level)
 	case 1 :
 		updatePanicBlur(1);
 		playPanicHeartBeat(.5);
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 1"));
 		break;
 	case 2 :
 		updatePanicBlur(1);
@@ -412,6 +413,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(1);
 		setMovementTimeDelay(level_one_movement_time_delay);
 		movement_speed = level_one_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 2"));
 		break;
 	case 3:
 		updatePanicBlur(2);
@@ -419,6 +421,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(2);
 		setMovementTimeDelay(level_two_movement_time_delay);
 		movement_speed = level_two_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 3"));
 		break;
 	case 4:
 		updatePanicBlur(3);
@@ -426,6 +429,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(2);
 		setMovementTimeDelay(level_two_movement_time_delay);
 		movement_speed = level_two_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 4"));
 		break;
 
 	case 5:
@@ -434,6 +438,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(3);
 		setMovementTimeDelay(level_three_movement_time_delay);
 		movement_speed = level_three_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 5"));
 		break;
 	default:
 		stopPanic();
@@ -450,7 +455,7 @@ void AStayCalmCharacter::stopPanic()
 	stopPlayingPanicHeartBeat();
 	updateDepthPerception(0);
 	movement_speed = 1.0;
-	setMovementTimeDelay(1.0);
+	setMovementTimeDelay(0.0);
 
 }
 
@@ -507,6 +512,7 @@ void AStayCalmCharacter::panicLineTrace()
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Trigger is active"));
 					trigger->trigger_event();
+					startPanic(trigger->get_panic_level());
 				}
 				
 			}
