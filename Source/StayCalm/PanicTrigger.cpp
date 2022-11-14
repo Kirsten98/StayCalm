@@ -8,6 +8,8 @@
 APanicTrigger::APanicTrigger()
 {
 	trigger_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Trigger Mesh"));
+	on_material = CreateDefaultSubobject<UMaterial>(TEXT("On Mesh"));
+	off_material = CreateDefaultSubobject<UMaterial>(TEXT("Off Mesh"));
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -43,6 +45,7 @@ void APanicTrigger::set_is_visible(bool visible)
 
 	// Stops the Actor from ticking
 	SetActorTickEnabled(visible);
+
 }
 
 
@@ -54,4 +57,13 @@ bool APanicTrigger::get_panic_trigger_active()
 
 void APanicTrigger::set_panic_trigger_active(bool active) {
 	panic_trigger_active = active;
+
+	if (panic_trigger_active)
+	{
+		trigger_mesh->SetMaterial(0,on_material);
+	}
+	else 
+	{
+		trigger_mesh->SetMaterial(0, off_material);
+	}
 }

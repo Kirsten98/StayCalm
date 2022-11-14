@@ -451,6 +451,8 @@ void AStayCalmCharacter::startPanic(int level)
 */
 void AStayCalmCharacter::stopPanic()
 {
+		
+	UE_LOG(LogTemp, Warning, TEXT("Stop Panic"));
 	updatePanicBlur(0);
 	stopPlayingPanicHeartBeat();
 	updateDepthPerception(0);
@@ -507,6 +509,7 @@ void AStayCalmCharacter::panicLineTrace()
 
 			if (trigger != nullptr && trigger->get_is_visible())
 			{
+				
 				UE_LOG(LogTemp, Warning, TEXT("Trigger is visible"));
 				if (trigger->get_panic_trigger_active())
 				{

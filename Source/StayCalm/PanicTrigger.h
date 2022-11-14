@@ -19,15 +19,27 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		class UStaticMeshComponent* trigger_mesh;
 
+	UPROPERTY(EditAnywhere)
+		class UMaterial* on_material;
+
+	UPROPERTY(EditAnywhere)
+		class UMaterial* off_material;
+
 	//The panic level that should be caused by this object
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Panic);
 	int panic_level = 0;
 	inline int get_panic_level(){ return panic_level; };
 
+	UFUNCTION(BlueprintCallable)
 	bool get_is_visible();
+
+	UFUNCTION(BlueprintCallable)
 	void set_is_visible(bool visible);
 
+	UFUNCTION(BlueprintCallable)
 	bool get_panic_trigger_active();
+
+	UFUNCTION(BlueprintCallable)
 	void set_panic_trigger_active(bool active);
 
 	//Implement what should happen for each panic trigger within the blueprint. Should Return Panic Level for trigger
