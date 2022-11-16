@@ -509,13 +509,14 @@ void AStayCalmCharacter::panicLineTrace()
 
 			if (trigger != nullptr && trigger->get_is_visible())
 			{
-				
+				 
 				UE_LOG(LogTemp, Warning, TEXT("Trigger is visible"));
 				if (trigger->get_panic_trigger_active())
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Trigger is active"));
-					trigger->trigger_event();
 					startPanic(trigger->get_panic_level());
+					trigger->trigger_event();
+					
 				}
 				
 			}

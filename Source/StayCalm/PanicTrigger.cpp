@@ -19,6 +19,7 @@ APanicTrigger::APanicTrigger()
 void APanicTrigger::BeginPlay()
 {
 	Super::BeginPlay();
+	trigger_mesh->SetMaterial(0, on_material);
 }
 
 // Called every frame
