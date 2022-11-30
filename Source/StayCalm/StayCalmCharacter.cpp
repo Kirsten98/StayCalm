@@ -13,6 +13,7 @@
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PanicProcessVolume.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/AudioComponent.h"
@@ -488,18 +489,57 @@ void AStayCalmCharacter::panicLineTrace()
 	
 	if (world)
 	{
+		//Main sight
 		FHitResult hit_result;
-
 		FVector start = GetActorLocation();
-		FVector end = start + (GetActorForwardVector() * 500);
-
+		FVector end = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * 500);
 		FCollisionObjectQueryParams parameters;
 		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel3);
+
+		//Peripherial
+
+		FHitResult peripherial_hit_result;
+		
+		//Left Peripherial check
+		FVector end_left = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector().RotateAngleAxis(35, FVector(0, 0, 1)) * 1000);
+
+		//Right Peripherial check
+		FVector end_right = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector().RotateAngleAxis(-35, FVector(0, 0, 1)) * 1000);
+		
+		FCollisionObjectQueryParams peripherial_parameters;
+		peripherial_parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel2);
+
 
 		FCollisionQueryParams query_params;
 		query_params.AddIgnoredActor(this);
 
 		DrawDebugLine(world, start, end, FColor::Red);
+		DrawDebugLine(world, start, end_left, FColor::Emerald);
+		DrawDebugLine(world, start, end_right, FColor::Emerald);
+
+		//Check Left Peripherial
+		if (world->LineTraceSingleByObjectType(peripherial_hit_result, start, end_left, peripherial_parameters, query_params) ||
+			world->LineTraceSingleByObjectType(peripherial_hit_result, start, end_right, peripherial_parameters, query_params))
+		{
+
+			APanicTrigger* trigger = Cast<APanicTrigger>(peripherial_hit_result.GetActor());
+			UE_LOG(LogTemp, Warning, TEXT("Found Peripherial Trigger"));
+
+			if (trigger != nullptr && trigger->get_is_visible())
+			{
+
+				UE_LOG(LogTemp, Warning, TEXT("Peripherial Trigger is visible"));
+				if (trigger->get_panic_trigger_active())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Peripherial Trigger is active"));
+					startPanic(trigger->get_panic_level());
+					trigger->trigger_event();
+
+				}
+
+			}
+
+		}
 		
 		if (world->LineTraceSingleByObjectType(hit_result, start, end, parameters, query_params))
 		{

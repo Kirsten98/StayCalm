@@ -16,7 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	APanicTrigger();
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = mesh)
 		class UStaticMeshComponent* trigger_mesh;
 
 	UPROPERTY(EditAnywhere)

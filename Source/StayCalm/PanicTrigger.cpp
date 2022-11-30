@@ -7,6 +7,7 @@
 // Sets default values
 APanicTrigger::APanicTrigger()
 {
+
 	trigger_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Trigger Mesh"));
 	on_material = CreateDefaultSubobject<UMaterial>(TEXT("On Mesh"));
 	off_material = CreateDefaultSubobject<UMaterial>(TEXT("Off Mesh"));
