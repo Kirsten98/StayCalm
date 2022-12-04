@@ -504,6 +504,7 @@ void AStayCalmCharacter::panicLineTrace()
 		FVector end = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * 500);
 		FCollisionObjectQueryParams parameters;
 		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel3);
+		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_Visibility);
 
 		//Peripherial
 
@@ -517,7 +518,7 @@ void AStayCalmCharacter::panicLineTrace()
 		
 		FCollisionObjectQueryParams peripherial_parameters;
 		peripherial_parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel2);
-
+		peripherial_parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldStatic);
 
 		FCollisionQueryParams query_params;
 		query_params.AddIgnoredActor(this);
