@@ -47,6 +47,7 @@ public:
 		void trigger_event();
 	
 	//Sets the comparison between panic triggers
+	/*
 	friend bool operator< (const APanicTrigger& l, const APanicTrigger& r)
 	{
 		return l.panic_level
@@ -70,7 +71,7 @@ public:
 		return l.panic_level
 			>= r.panic_level; // keep the same order
 	}
-
+	*/
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -79,7 +80,7 @@ protected:
 	bool is_visible = true;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Panic)
-	bool panic_trigger_active = true;
+	bool panic_trigger_active = false;
 
 public:	
 	// Called every frame

@@ -103,6 +103,15 @@ void AStayCalmCharacter::BeginPlay()
 
 	//Retrieves a list of all of the panic triggers
 	addAllPanicTriggers();
+
+	//Activates the first Panic Trigger
+	UE_LOG(LogTemp, Warning, TEXT("Found All Triggers %d"), found_triggers.Num());
+	if (found_triggers.Num() >= 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Activated First Trigger"));
+		found_triggers.Pop()->set_panic_trigger_active(true);
+	}
+	
 	
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -477,7 +486,7 @@ void AStayCalmCharacter::addAllPanicTriggers()
 			//UE_LOG(LogTemp, Warning, TEXT("Found %d triggers"), found_triggers[actor]->get_panic_level());
 		}
 		
-		found_triggers.Sort();
+		found_triggers.Sort([](const APanicTrigger& a, const APanicTrigger& b) { return a.panic_level > b.panic_level; });
 		
 	}
 	
@@ -535,6 +544,13 @@ void AStayCalmCharacter::panicLineTrace()
 					startPanic(trigger->get_panic_level());
 					trigger->trigger_event();
 
+					//Activates the next trigger and removes it from the found triggers array.
+					if (found_triggers.Num() >= 1)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
+						found_triggers.Pop()->set_panic_trigger_active(true);
+					}
+					
 				}
 
 			}
@@ -556,6 +572,16 @@ void AStayCalmCharacter::panicLineTrace()
 					UE_LOG(LogTemp, Warning, TEXT("Trigger is active"));
 					startPanic(trigger->get_panic_level());
 					trigger->trigger_event();
+
+					if (found_triggers.Num() >= 1)
+					{
+						//Activates the next trigger and removes it from the found triggers array.
+						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
+						found_triggers.Pop()->set_panic_trigger_active(true);
+					}
+					
+					
+					
 					
 				}
 				
