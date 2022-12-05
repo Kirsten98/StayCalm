@@ -13,9 +13,11 @@
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PanicProcessVolume.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/AudioComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -98,6 +100,18 @@ void AStayCalmCharacter::BeginPlay()
 	
 	//Stops the heartbeat cue from playing
 	stopPlayingPanicHeartBeat();
+
+	//Retrieves a list of all of the panic triggers
+	addAllPanicTriggers();
+
+	//Activates the first Panic Trigger
+	UE_LOG(LogTemp, Warning, TEXT("Found All Triggers %d"), found_triggers.Num());
+	if (found_triggers.Num() >= 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Activated First Trigger"));
+		found_triggers.Pop()->set_panic_trigger_active(true);
+	}
+	
 	
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -111,6 +125,11 @@ void AStayCalmCharacter::BeginPlay()
 		Mesh1P->SetHiddenInGame(false, true);
 	}
 	
+}
+
+void AStayCalmCharacter::Tick(float DeltaTime)
+{
+	panicLineTrace();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -396,6 +415,7 @@ void AStayCalmCharacter::startPanic(int level)
 	case 1 :
 		updatePanicBlur(1);
 		playPanicHeartBeat(.5);
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 1"));
 		break;
 	case 2 :
 		updatePanicBlur(1);
@@ -403,6 +423,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(1);
 		setMovementTimeDelay(level_one_movement_time_delay);
 		movement_speed = level_one_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 2"));
 		break;
 	case 3:
 		updatePanicBlur(2);
@@ -410,6 +431,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(2);
 		setMovementTimeDelay(level_two_movement_time_delay);
 		movement_speed = level_two_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 3"));
 		break;
 	case 4:
 		updatePanicBlur(3);
@@ -417,6 +439,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(2);
 		setMovementTimeDelay(level_two_movement_time_delay);
 		movement_speed = level_two_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 4"));
 		break;
 
 	case 5:
@@ -425,6 +448,7 @@ void AStayCalmCharacter::startPanic(int level)
 		updateDepthPerception(3);
 		setMovementTimeDelay(level_three_movement_time_delay);
 		movement_speed = level_three_movement_speed;
+		UE_LOG(LogTemp, Warning, TEXT("Panic Level 5"));
 		break;
 	default:
 		stopPanic();
@@ -437,10 +461,135 @@ void AStayCalmCharacter::startPanic(int level)
 */
 void AStayCalmCharacter::stopPanic()
 {
+		
+	UE_LOG(LogTemp, Warning, TEXT("Stop Panic"));
 	updatePanicBlur(0);
 	stopPlayingPanicHeartBeat();
 	updateDepthPerception(0);
 	movement_speed = 1.0;
-	setMovementTimeDelay(1.0);
+	setMovementTimeDelay(0.0);
 
+}
+
+void AStayCalmCharacter::addAllPanicTriggers()
+{
+	
+	if (GetWorld() != nullptr) 
+	{
+		
+		TArray<AActor*> found_actors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APanicTrigger::StaticClass(), found_actors);
+		
+		for (int actor = 0; actor < found_actors.Num(); actor++)
+		{
+			found_triggers.Push(Cast<APanicTrigger>(found_actors[actor]));
+			//UE_LOG(LogTemp, Warning, TEXT("Found %d triggers"), found_triggers[actor]->get_panic_level());
+		}
+		
+		found_triggers.Sort([](const APanicTrigger& a, const APanicTrigger& b) { return a.panic_level > b.panic_level; });
+		
+	}
+	
+}
+
+void AStayCalmCharacter::panicLineTrace()
+{
+	UWorld *world = GetWorld();
+	
+	if (world)
+	{
+		//Main sight
+		FHitResult hit_result;
+		FVector start = GetActorLocation();
+		FVector end = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * 500);
+		FCollisionObjectQueryParams parameters;
+		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel3);
+		parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_Visibility);
+
+		//Peripherial
+
+		FHitResult peripherial_hit_result;
+		
+		//Left Peripherial check
+		FVector end_left = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector().RotateAngleAxis(35, FVector(0, 0, 1)) * 1000);
+
+		//Right Peripherial check
+		FVector end_right = start + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector().RotateAngleAxis(-35, FVector(0, 0, 1)) * 1000);
+		
+		FCollisionObjectQueryParams peripherial_parameters;
+		peripherial_parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel2);
+		peripherial_parameters.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldStatic);
+
+		FCollisionQueryParams query_params;
+		query_params.AddIgnoredActor(this);
+
+		DrawDebugLine(world, start, end, FColor::Red);
+		DrawDebugLine(world, start, end_left, FColor::Emerald);
+		DrawDebugLine(world, start, end_right, FColor::Emerald);
+
+		//Check Left Peripherial
+		if (world->LineTraceSingleByObjectType(peripherial_hit_result, start, end_left, peripherial_parameters, query_params) ||
+			world->LineTraceSingleByObjectType(peripherial_hit_result, start, end_right, peripherial_parameters, query_params))
+		{
+
+			APanicTrigger* trigger = Cast<APanicTrigger>(peripherial_hit_result.GetActor());
+			UE_LOG(LogTemp, Warning, TEXT("Found Peripherial Trigger"));
+
+			if (trigger != nullptr && trigger->get_is_visible())
+			{
+
+				UE_LOG(LogTemp, Warning, TEXT("Peripherial Trigger is visible"));
+				if (trigger->get_panic_trigger_active())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Peripherial Trigger is active"));
+					startPanic(trigger->get_panic_level());
+					trigger->trigger_event();
+
+					//Activates the next trigger and removes it from the found triggers array.
+					if (found_triggers.Num() >= 1)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
+						found_triggers.Pop()->set_panic_trigger_active(true);
+					}
+					
+				}
+
+			}
+
+		}
+		
+		if (world->LineTraceSingleByObjectType(hit_result, start, end, parameters, query_params))
+		{
+			
+			APanicTrigger* trigger = Cast<APanicTrigger>(hit_result.GetActor());
+			UE_LOG(LogTemp, Warning, TEXT("Found Trigger"));
+
+			if (trigger != nullptr && trigger->get_is_visible())
+			{
+				 
+				UE_LOG(LogTemp, Warning, TEXT("Trigger is visible"));
+				if (trigger->get_panic_trigger_active())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Trigger is active"));
+					startPanic(trigger->get_panic_level());
+					trigger->trigger_event();
+
+					if (found_triggers.Num() >= 1)
+					{
+						//Activates the next trigger and removes it from the found triggers array.
+						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
+						found_triggers.Pop()->set_panic_trigger_active(true);
+					}
+					
+					
+					
+					
+				}
+				
+			}
+			
+		}
+		
+		
+	}
 }
