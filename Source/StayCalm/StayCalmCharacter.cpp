@@ -109,6 +109,7 @@ void AStayCalmCharacter::BeginPlay()
 	if (found_triggers.Num() >= 1)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Activated First Trigger"));
+		found_triggers[0]->set_is_visible(true);
 		found_triggers.Pop()->set_panic_trigger_active(true);
 	}
 	

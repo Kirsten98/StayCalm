@@ -55,9 +55,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//Used to determine if the trigger is visible in game
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Panic)
-	bool is_visible = true;
+	//Used to determinem if the trigger is visible in game
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Panic)
+	bool is_visible = false;
 
 	//Used to determine if the trigger is active and can be triggered
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Panic)
