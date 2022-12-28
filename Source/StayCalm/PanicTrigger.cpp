@@ -20,7 +20,7 @@ APanicTrigger::APanicTrigger()
 void APanicTrigger::BeginPlay()
 {
 	Super::BeginPlay();
-	set_is_visible(is_visible);
+	//set_is_visible(is_visible);
 	//trigger_mesh->SetMaterial(0, on_material);
 }
 

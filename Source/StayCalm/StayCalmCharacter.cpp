@@ -110,7 +110,8 @@ void AStayCalmCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Activated First Trigger"));
 		found_triggers[0]->set_is_visible(true);
-		found_triggers.Pop()->set_panic_trigger_active(true);
+		found_triggers[0]->set_panic_trigger_active(true);
+		found_triggers.RemoveAt(0);
 	}
 	
 	
@@ -487,7 +488,7 @@ void AStayCalmCharacter::addAllPanicTriggers()
 			//UE_LOG(LogTemp, Warning, TEXT("Found %d triggers"), found_triggers[actor]->get_panic_level());
 		}
 		
-		found_triggers.Sort([](const APanicTrigger& a, const APanicTrigger& b) { return a.panic_level > b.panic_level; });
+		found_triggers.Sort([](const APanicTrigger& a, const APanicTrigger& b) { return a.panic_level < b.panic_level; });
 		
 	}
 	
@@ -550,7 +551,9 @@ void AStayCalmCharacter::panicLineTrace()
 					if (found_triggers.Num() >= 1)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
-						found_triggers.Pop()->set_panic_trigger_active(true);
+						found_triggers[0]->set_is_visible(true);
+						found_triggers[0]->set_panic_trigger_active(true);
+						found_triggers.RemoveAt(0);
 					}
 					
 				}
@@ -579,7 +582,9 @@ void AStayCalmCharacter::panicLineTrace()
 					{
 						//Activates the next trigger and removes it from the found triggers array.
 						UE_LOG(LogTemp, Warning, TEXT("Activated next trigger. Triggers left %d"), found_triggers.Num());
-						found_triggers.Pop()->set_panic_trigger_active(true);
+						found_triggers[0]->set_is_visible(true);
+						found_triggers[0]->set_panic_trigger_active(true);
+						found_triggers.RemoveAt(0);
 					}
 					
 					
