@@ -266,8 +266,11 @@ void AStayCalmCharacter::executeDelayedMovement()
 
 void AStayCalmCharacter::MoveForward(float Value)
 {
+
 	if (Value != 0.0f)
 	{
+		is_walking_forward = true;
+
 		if (movement_time_delay > 0) {
 			movement characterMovement;
 			characterMovement.direction = e_movement_direction::FORWARD;
@@ -286,12 +289,19 @@ void AStayCalmCharacter::MoveForward(float Value)
 		}
 		
 	}
+	else 
+	{
+		is_walking_forward = false;
+	}
 }
 
 void AStayCalmCharacter::MoveRight(float Value)
 {
+
 	if (Value != 0.0f)
 	{
+		is_walking_right = true;
+
 		if (movement_time_delay > 0) {
 			movement characterMovement;
 			characterMovement.direction = e_movement_direction::RIGHT;
@@ -308,6 +318,10 @@ void AStayCalmCharacter::MoveRight(float Value)
 		else {
 			AddMovementInput(GetActorRightVector(), Value / movement_speed);
 		}
+	}
+	else
+	{
+		is_walking_right = false;
 	}
 }
 

@@ -39,7 +39,6 @@ class AStayCalmCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Panic, meta = (AllowPrivateAccess = "true"))
 	class UPostProcessComponent* PanicPostProcess;
 public:
@@ -113,6 +112,13 @@ protected:
 	//Updates intesity of the depth perception change user will experience. Level 0 - No change, Level 3 Max distance the camera will view.
 	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
 		void updateDepthPerception(int level);
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		bool is_walking_forward = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		bool is_walking_right = false;
 
 						
 
