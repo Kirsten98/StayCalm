@@ -69,6 +69,11 @@ void AStayCalmCharacter::BeginPlay()
 		found_triggers.RemoveAt(0);
 	}
 	
+	if (BP_PauseWidgetMenu != nullptr)
+	{
+		PauseMenu = CreateWidget<UPauseMenuWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), BP_PauseWidgetMenu);
+	}
+
 	
 }
 
@@ -93,6 +98,9 @@ void AStayCalmCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("MoveForward", this, &AStayCalmCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AStayCalmCharacter::MoveRight);
 
+	//Bind Pause Menu HUD
+	PlayerInputComponent->BindAction("Pause", IE_Pressed,this, &AStayCalmCharacter::Pause_Game);
+	
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
@@ -272,6 +280,42 @@ void AStayCalmCharacter::LookUpAtRate(float Rate)
 	
 }
 
+void AStayCalmCharacter::Pause_Game()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Paused Game"));
+	if (PauseMenu != nullptr)
+	{
+
+		UE_LOG(LogTemp, Warning, TEXT("Paused Game - Pause Menu Valid"));
+		if (!PauseMenu->get_is_paused())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Paused Game - Pause Menu is not Paused. Showing Pause Screen"));
+			// Disable the character movement but do not disable mouse movement
+			//movement_speed = 0.0f;
+			APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			playerController->SetInputMode(FInputModeUIOnly());
+
+			// Show Pause Menu Screen
+			PauseMenu->AddToViewport();
+			PauseMenu->set_is_paused(true);
+			playerController->SetShowMouseCursor(true);
+
+		}
+		else
+		{
+			// Enable the character
+			//startPanic(panicLevel);
+			APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			playerController->SetInputMode(FInputModeGameOnly());
+			playerController->SetShowMouseCursor(false);
+
+			// Remove Pause Menu Screen
+			PauseMenu->RemoveFromParent();
+			PauseMenu->set_is_paused(false);
+		}
+	}
+}
+
 //Sets the delay in ms for the characters input to the parameter. 
 void AStayCalmCharacter::setMovementTimeDelay(float time_delay) 
 {
@@ -303,6 +347,7 @@ void AStayCalmCharacter::startPanic(int level)
 {
 	//Stops any panic symptoms before starting the next level
 	stopPanic();
+	panicLevel = level;
 
 	switch(level) {
 
