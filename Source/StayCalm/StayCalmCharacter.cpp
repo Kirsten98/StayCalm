@@ -100,7 +100,7 @@ void AStayCalmCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	//Bind Pause Menu HUD
 	PlayerInputComponent->BindAction("Pause", IE_Pressed,this, &AStayCalmCharacter::Pause_Game);
-	
+																																																																																																																																																																														
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
@@ -290,8 +290,11 @@ void AStayCalmCharacter::Pause_Game()
 		if (!PauseMenu->get_is_paused())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Paused Game - Pause Menu is not Paused. Showing Pause Screen"));
+			PauseMenu->show();
 			// Disable the character movement but do not disable mouse movement
 			//movement_speed = 0.0f;
+
+			/*
 			APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 			playerController->SetInputMode(FInputModeUIOnly());
 
@@ -299,12 +302,16 @@ void AStayCalmCharacter::Pause_Game()
 			PauseMenu->AddToViewport();
 			PauseMenu->set_is_paused(true);
 			playerController->SetShowMouseCursor(true);
+			*/
 
 		}
 		else
-		{
+		{	
+			UE_LOG(LogTemp, Warning, TEXT("Paused Game - Pause Menu is Paused. Removing Pause Screen"));
+			PauseMenu->hide();
 			// Enable the character
 			//startPanic(panicLevel);
+			/*
 			APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 			playerController->SetInputMode(FInputModeGameOnly());
 			playerController->SetShowMouseCursor(false);
@@ -312,6 +319,7 @@ void AStayCalmCharacter::Pause_Game()
 			// Remove Pause Menu Screen
 			PauseMenu->RemoveFromParent();
 			PauseMenu->set_is_paused(false);
+			*/
 		}
 	}
 }
