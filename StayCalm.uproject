@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"CinematicCamera",
-				"Engine"
+				"Engine",
+				"UMG"
 			]
 		}
 	],

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "PanicTrigger.h"
+#include "PauseMenuWidget.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "StayCalmCharacter.generated.h"
@@ -30,6 +31,8 @@ protected:
 
 	void Tick(float DeltaTime);
 
+
+	// --------------- Panic Variables ----------------------------
 	int panicLevel = 0;
 
 	//Constant level variables for the different stages of movement time delay for movement_time_delay
@@ -93,6 +96,16 @@ protected:
 	//Updates intesity of the depth perception change user will experience. Level 0 - No change, Level 3 Max distance the camera will view.
 	UFUNCTION(BlueprintImplementableEvent, Category = Panic)
 		void updateDepthPerception(int level);
+
+	//------------------------ UI / HUD ---------------------------
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<class UPauseMenuWidget> BP_PauseWidgetMenu;
+
+
+	UPROPERTY()
+		UPauseMenuWidget* PauseMenu;
+
+	void Pause_Game();
 
 						
 
