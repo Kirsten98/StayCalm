@@ -107,6 +107,9 @@ protected:
 
 	void Pause_Game();
 
+	//Validates that the game has been started and the start menu is no longer displayed. Once true, it is not set back to false.
+	bool game_started = false;
+
 						
 
 public:

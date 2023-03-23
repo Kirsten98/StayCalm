@@ -18,6 +18,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Components/AudioComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -306,7 +307,7 @@ void AStayCalmCharacter::Pause_Game()
 
 		}
 		else
-		{	
+		{
 			UE_LOG(LogTemp, Warning, TEXT("Paused Game - Pause Menu is Paused. Removing Pause Screen"));
 			PauseMenu->hide();
 			// Enable the character
