@@ -471,9 +471,9 @@ void AStayCalmCharacter::panicLineTrace()
 		FCollisionQueryParams query_params;
 		query_params.AddIgnoredActor(this);
 
-		DrawDebugLine(world, start, end, FColor::Red);
-		DrawDebugLine(world, start, end_left, FColor::Emerald);
-		DrawDebugLine(world, start, end_right, FColor::Emerald);
+		//DrawDebugLine(world, start, end, FColor::Red);
+		//DrawDebugLine(world, start, end_left, FColor::Emerald);
+		//DrawDebugLine(world, start, end_right, FColor::Emerald);
 
 		//Check Left Peripherial
 		if (world->LineTraceSingleByObjectType(peripherial_hit_result, start, end_left, peripherial_parameters, query_params) ||
